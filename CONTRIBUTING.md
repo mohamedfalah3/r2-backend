@@ -6,7 +6,7 @@ Thank you for your interest in contributing to the R2 Backend project! This docu
 
 ### 1. Fork the Repository
 
-1. Go to the [main repository](https://github.com/yourusername/r2-backend)
+1. Go to the [main repository](https://github.com/mohamedfalah3/r2-backend)
 2. Click the "Fork" button in the top right
 3. Clone your forked repository locally
 
@@ -252,7 +252,7 @@ const processFile = (file) => {
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/r2-backend.git
+git clone https://github.com/mohamedfalah3/r2-backend.git
 cd r2-backend
 
 # Install dependencies

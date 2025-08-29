@@ -159,11 +159,11 @@ PORT=3000
 1. **Deploy your service**
 2. **Test the health endpoint:**
    ```bash
-   curl https://your-app-url.com/health
+       curl https://r2-backend-1k7p.onrender.com/health
    ```
 3. **Test signed URL generation:**
    ```bash
-   curl "https://your-app-url.com/getSignedUrl?file=test.jpg"
+       curl "https://r2-backend-1k7p.onrender.com/getSignedUrl?file=test.jpg"
    ```
 
 ## 🎯 Next Steps

@@ -29,7 +29,7 @@ This guide covers deploying the R2 Signed URL Backend to various cloud platforms
    ```
 
 7. Click "Create Web Service"
-8. Your service will be available at: `https://your-app-name.onrender.com`
+8. Your service will be available at: `https://r2-backend-1k7p.onrender.com`
 
 ### 2. Deploy to Railway
 
@@ -170,7 +170,7 @@ CORS_ORIGIN=https://your-app.com,https://your-mobile-app.com
 
 Monitor your service:
 ```bash
-curl https://your-backend.com/health
+curl https://r2-backend-1k7p.onrender.com/health
 ```
 
 Expected response:
@@ -187,7 +187,7 @@ Expected response:
 
 Check cache performance:
 ```bash
-curl https://your-backend.com/cache-stats
+curl https://r2-backend-1k7p.onrender.com/cache-stats
 ```
 
 ## 🐛 Troubleshooting

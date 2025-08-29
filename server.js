@@ -947,7 +947,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 R2 Signed URL Service running on port ${PORT}`);
   console.log(`📁 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Local: http://localhost:${PORT}/health`);
-  console.log(`🔗 Network: http://192.168.100.15:${PORT}/health`);
+  console.log(`🔗 Network: https://r2-backend-1k7p.onrender.com/health`);
 });
 
 // Graceful shutdown

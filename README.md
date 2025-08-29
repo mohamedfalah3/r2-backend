@@ -92,7 +92,7 @@ GET /getSignedUrl?file=FILENAME
 
 **Example:**
 ```bash
-curl "http://localhost:3000/getSignedUrl?file=books/cover.jpg"
+curl "https://r2-backend-1k7p.onrender.com/getSignedUrl?file=books/cover.jpg"
 ```
 
 **Response:**
@@ -116,7 +116,7 @@ GET /getIOSAudioUrl?file=FILENAME
 
 **Example:**
 ```bash
-curl "http://localhost:3000/getIOSAudioUrl?file=books/audio.mp3"
+curl "https://r2-backend-1k7p.onrender.com/getIOSAudioUrl?file=books/audio.mp3"
 ```
 
 **Response:**
@@ -151,7 +151,7 @@ Content-Type: application/json
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:3000/getUploadUrl" \
+curl -X POST "https://r2-backend-1k7p.onrender.com/getUploadUrl" \
   -H "Content-Type: application/json" \
   -d '{"file": "books/cover.jpg", "contentType": "image/jpeg"}'
 ```
@@ -178,7 +178,7 @@ import { fileUploadService } from './src/services/fileUploadService';
 const uploadFileWithSignedUrl = async (fileUri: string, fileName: string, contentType: string) => {
   try {
     // 1. Get signed upload URL from backend
-    const response = await fetch('https://your-backend.com/getUploadUrl', {
+    const response = await fetch('https://r2-backend-1k7p.onrender.com/getUploadUrl', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -230,7 +230,7 @@ await uploadFileWithSignedUrl(
 const downloadFileWithSignedUrl = async (fileName: string) => {
   try {
     // 1. Get signed download URL from backend
-    const response = await fetch(`https://your-backend.com/getSignedUrl?file=${encodeURIComponent(fileName)}`);
+    const response = await fetch(`https://r2-backend-1k7p.onrender.com/getSignedUrl?file=${encodeURIComponent(fileName)}`);
     const { signedUrl } = await response.json();
 
     // 2. Download file using signed URL
@@ -282,7 +282,7 @@ This backend includes special optimizations for audio files to ensure compatibil
 #### Usage for Audio Files:
 ```typescript
 // For iOS-optimized audio downloads
-const audioUrl = await fetch(`https://your-backend.com/getIOSAudioUrl?file=books/audio.mp3`);
+const audioUrl = await fetch(`https://r2-backend-1k7p.onrender.com/getIOSAudioUrl?file=books/audio.mp3`);
 const { signedUrl } = await audioUrl.json();
 
 // Use signedUrl with AVPlayer or other audio players
@@ -342,7 +342,7 @@ const { signedUrl } = await audioUrl.json();
 ### Health Check
 Monitor your service health:
 ```bash
-curl https://your-backend.com/health
+curl https://r2-backend-1k7p.onrender.com/health
 ```
 
 ### Logs
