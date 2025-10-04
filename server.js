@@ -79,7 +79,7 @@ app.get('/debug-env', (req, res) => {
 
 // ===== APPWRITE STORAGE ENDPOINTS =====
 
-// Upload file to Appwrite Storage
+// Upload file to Appwrite Storage (JSON format)
 app.post('/appwrite/upload', async (req, res) => {
   try {
     const { fileBuffer, fileName, mimeType, folder } = req.body;
@@ -110,6 +110,36 @@ app.post('/appwrite/upload', async (req, res) => {
     console.error('Error uploading file to Appwrite Storage:', error);
     res.status(500).json({
       error: 'Failed to upload file to Appwrite Storage',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// Upload file to Appwrite Storage (FormData format)
+app.post('/appwrite/upload-form', async (req, res) => {
+  try {
+    console.log('📤 FormData upload request received');
+    console.log('Content-Type:', req.headers['content-type']);
+    
+    // Check if it's multipart/form-data
+    if (!req.headers['content-type']?.includes('multipart/form-data')) {
+      return res.status(400).json({
+        error: 'Content-Type must be multipart/form-data',
+        received: req.headers['content-type']
+      });
+    }
+
+    // For now, we'll use the same JSON endpoint logic
+    // In a real implementation, you'd use multer or similar to handle FormData
+    return res.status(400).json({
+      error: 'FormData upload not implemented yet',
+      suggestion: 'Use the JSON endpoint instead'
+    });
+
+  } catch (error) {
+    console.error('Error handling FormData upload:', error);
+    res.status(500).json({
+      error: 'Failed to handle FormData upload',
       message: error.message || 'Internal server error'
     });
   }
