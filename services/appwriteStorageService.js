@@ -38,8 +38,7 @@ class AppwriteStorageService {
         [
           Permission.read(Role.any()),
           Permission.write(Role.any())
-        ],
-        fullPath
+        ]
       );
 
       console.log('✅ File uploaded successfully to Appwrite Storage');
@@ -49,8 +48,8 @@ class AppwriteStorageService {
       return {
         success: true,
         fileId: file.$id,
-        fileName: fullPath,
-        fileSize: fileBuffer.length,
+        fileName: file.name,
+        fileSize: file.sizeOriginal,
         url: this.getFileUrl(file.$id)
       };
 
