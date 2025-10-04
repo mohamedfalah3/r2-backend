@@ -28,10 +28,13 @@ class AppwriteStorageService {
 
       const fullPath = folder ? `${folder}/${fileName}` : fileName;
 
+      // Ensure fileBuffer is a Buffer
+      const buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
+      
       const file = await this.storage.createFile(
         this.bucketId,
         ID.unique(),
-        fileBuffer,
+        buffer,
         undefined, // permissions
         fullPath
       );
@@ -50,6 +53,14 @@ class AppwriteStorageService {
 
     } catch (error) {
       console.error('Error uploading file to Appwrite Storage:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        type: error.type,
+        bucketId: this.bucketId,
+        fileName: fullPath,
+        bufferLength: buffer.length
+      });
       throw error;
     }
   }
