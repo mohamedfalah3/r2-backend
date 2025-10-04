@@ -1,4 +1,4 @@
-const { Client, Storage, ID } = require('node-appwrite');
+const { Client, Storage, ID, Permission, Role } = require('node-appwrite');
 
 class AppwriteStorageService {
   constructor() {
@@ -35,7 +35,10 @@ class AppwriteStorageService {
         this.bucketId,
         ID.unique(),
         buffer,
-        undefined, // permissions
+        [
+          Permission.read(Role.any()),
+          Permission.write(Role.any())
+        ],
         fullPath
       );
 
