@@ -9,6 +9,9 @@ require('dotenv').config();
 // Import authentication routes
 const authRoutes = require('./routes/auth');
 
+// Import Appwrite Storage service
+const AppwriteStorageService = require('./services/appwriteStorageService');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -64,7 +67,7 @@ if (process.env.REDIS_URL) {
   }
 }
 
-// Initialize S3 client for R2
+// Initialize S3 client for R2 (DEPRECATED - kept for backward compatibility)
 const s3Client = new S3Client({
   region: 'auto',
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -73,6 +76,9 @@ const s3Client = new S3Client({
     secretAccessKey: process.env.R2_SECRET_KEY,
   },
 });
+
+// Initialize Appwrite Storage service
+const appwriteStorageService = new AppwriteStorageService();
 
 // Security middleware
 app.use(helmet());
@@ -869,6 +875,252 @@ app.delete('/deleteFile', async (req, res) => {
   }
 });
 
+// ===== APPWRITE STORAGE ENDPOINTS =====
+
+// Upload file to Appwrite Storage
+app.post('/appwrite/upload', async (req, res) => {
+  try {
+    const { fileBuffer, fileName, mimeType, folder } = req.body;
+    
+    if (!fileBuffer || !fileName) {
+      return res.status(400).json({
+        error: 'fileBuffer and fileName are required',
+        example: { fileBuffer: 'base64string', fileName: 'image.jpg', mimeType: 'image/jpeg', folder: 'images' }
+      });
+    }
+
+    // Convert base64 to buffer if needed
+    let buffer;
+    if (typeof fileBuffer === 'string') {
+      buffer = Buffer.from(fileBuffer, 'base64');
+    } else {
+      buffer = Buffer.from(fileBuffer);
+    }
+
+    const result = await appwriteStorageService.uploadFile(buffer, fileName, mimeType, folder);
+
+    res.json({
+      success: true,
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Error uploading file to Appwrite Storage:', error);
+    res.status(500).json({
+      error: 'Failed to upload file to Appwrite Storage',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// Delete file from Appwrite Storage
+app.delete('/appwrite/delete', async (req, res) => {
+  try {
+    const { fileId } = req.body;
+    
+    if (!fileId) {
+      return res.status(400).json({
+        error: 'fileId parameter is required in request body',
+        example: { fileId: '64a1b2c3d4e5f6789abcdef0' }
+      });
+    }
+
+    const result = await appwriteStorageService.deleteFile(fileId);
+
+    res.json({
+      success: true,
+      message: 'File deleted successfully',
+      fileId: fileId,
+      deletedAt: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error deleting file from Appwrite Storage:', error);
+    
+    res.status(500).json({
+      error: 'Failed to delete file from Appwrite Storage',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// Get file URL from Appwrite Storage
+app.get('/appwrite/fileUrl/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    
+    if (!fileId) {
+      return res.status(400).json({
+        error: 'fileId parameter is required'
+      });
+    }
+
+    const fileUrl = appwriteStorageService.getFileUrl(fileId);
+
+    res.json({
+      success: true,
+      url: fileUrl,
+      fileId: fileId
+    });
+
+  } catch (error) {
+    console.error('Error getting file URL from Appwrite Storage:', error);
+    res.status(500).json({
+      error: 'Failed to get file URL',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// Get file download URL from Appwrite Storage
+app.get('/appwrite/downloadUrl/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    
+    if (!fileId) {
+      return res.status(400).json({
+        error: 'fileId parameter is required'
+      });
+    }
+
+    const downloadUrl = appwriteStorageService.getFileDownloadUrl(fileId);
+
+    res.json({
+      success: true,
+      url: downloadUrl,
+      fileId: fileId
+    });
+
+  } catch (error) {
+    console.error('Error getting download URL from Appwrite Storage:', error);
+    res.status(500).json({
+      error: 'Failed to get download URL',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// Get file preview URL from Appwrite Storage
+app.get('/appwrite/previewUrl/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const { width, height } = req.query;
+    
+    if (!fileId) {
+      return res.status(400).json({
+        error: 'fileId parameter is required'
+      });
+    }
+
+    const previewUrl = appwriteStorageService.getFilePreviewUrl(
+      fileId, 
+      width ? parseInt(width) : null, 
+      height ? parseInt(height) : null
+    );
+
+    res.json({
+      success: true,
+      url: previewUrl,
+      fileId: fileId,
+      dimensions: { width, height }
+    });
+
+  } catch (error) {
+    console.error('Error getting preview URL from Appwrite Storage:', error);
+    res.status(500).json({
+      error: 'Failed to get preview URL',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// List files in Appwrite Storage
+app.get('/appwrite/files', async (req, res) => {
+  try {
+    const files = await appwriteStorageService.listFiles();
+
+    res.json({
+      success: true,
+      files: files,
+      count: files.length
+    });
+
+  } catch (error) {
+    console.error('Error listing files from Appwrite Storage:', error);
+    res.status(500).json({
+      error: 'Failed to list files',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// Get file info from Appwrite Storage
+app.get('/appwrite/fileInfo/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    
+    if (!fileId) {
+      return res.status(400).json({
+        error: 'fileId parameter is required'
+      });
+    }
+
+    const fileInfo = await appwriteStorageService.getFileInfo(fileId);
+
+    res.json({
+      success: true,
+      file: fileInfo
+    });
+
+  } catch (error) {
+    console.error('Error getting file info from Appwrite Storage:', error);
+    res.status(500).json({
+      error: 'Failed to get file info',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// Test Appwrite Storage connection
+app.get('/appwrite/test', async (req, res) => {
+  try {
+    const result = await appwriteStorageService.testConnection();
+
+    res.json({
+      success: result.success,
+      message: result.message,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error testing Appwrite Storage connection:', error);
+    res.status(500).json({
+      error: 'Failed to test Appwrite Storage connection',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
+// Get Appwrite Storage statistics
+app.get('/appwrite/stats', async (req, res) => {
+  try {
+    const stats = await appwriteStorageService.getStorageStats();
+
+    res.json({
+      success: true,
+      stats: stats,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error getting Appwrite Storage stats:', error);
+    res.status(500).json({
+      error: 'Failed to get storage statistics',
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
@@ -891,6 +1143,15 @@ app.use('*', (req, res) => {
       'GET /cache-stats',
       'POST /clear-cache',
       'POST /invalidate-cache',
+      'POST /appwrite/upload - Upload file to Appwrite Storage',
+      'DELETE /appwrite/delete - Delete file from Appwrite Storage',
+      'GET /appwrite/fileUrl/:fileId - Get file URL',
+      'GET /appwrite/downloadUrl/:fileId - Get download URL',
+      'GET /appwrite/previewUrl/:fileId - Get preview URL',
+      'GET /appwrite/files - List all files',
+      'GET /appwrite/fileInfo/:fileId - Get file info',
+      'GET /appwrite/test - Test Appwrite connection',
+      'GET /appwrite/stats - Get storage statistics',
       'POST /auth/send-otp',
       'POST /auth/verify-otp',
       'GET /auth/status'
