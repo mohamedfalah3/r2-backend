@@ -9,7 +9,7 @@ class AppwriteStorageService {
       .setKey(process.env.APPWRITE_API_KEY);
 
     this.storage = new Storage(this.client);
-    this.bucketId = process.env.APPWRITE_BUCKET_ID || 'files';
+    this.bucketId = process.env.APPWRITE_BUCKET_ID || 'storage';
   }
 
   /**
