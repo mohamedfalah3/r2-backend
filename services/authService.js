@@ -5,7 +5,7 @@ const { Client, Account, Databases, ID } = require('appwrite');
 const appwriteClient = new Client()
   .setEndpoint(process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1')
   .setProject(process.env.APPWRITE_PROJECT_ID || '68ab553b003351139481')
-  .setKey(process.env.APPWRITE_API_KEY || 'dummy-key');
+  .setDevKey(process.env.APPWRITE_API_KEY || 'dummy-key');
 
 const account = new Account(appwriteClient);
 const databases = new Databases(appwriteClient);
