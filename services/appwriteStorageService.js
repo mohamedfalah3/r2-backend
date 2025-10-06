@@ -1,12 +1,12 @@
-const { Client, Storage, ID, Permission, Role } = require('node-appwrite');
+const { Client, Storage, ID, Permission, Role } = require('appwrite');
 
 class AppwriteStorageService {
   constructor() {
     // Initialize Appwrite client
-    this.client = new Client()
-      .setEndpoint(process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1')
-      .setProject(process.env.APPWRITE_PROJECT_ID)
-      .setKey(process.env.APPWRITE_API_KEY);
+    this.client = new Client();
+    this.client.setEndpoint(process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1');
+    this.client.setProject(process.env.APPWRITE_PROJECT_ID);
+    this.client.setDevKey(process.env.APPWRITE_API_KEY);
 
     this.storage = new Storage(this.client);
     this.bucketId = process.env.APPWRITE_BUCKET_ID || '68e12c7d000533b0403d';
@@ -20,16 +20,19 @@ class AppwriteStorageService {
    * @param {string} folder - Optional folder path
    */
   async uploadFile(fileBuffer, fileName, mimeType, folder = null) {
+    let fullPath;
+    let buffer;
+    
     try {
       console.log('Uploading file to Appwrite Storage...');
       console.log('File name:', fileName);
       console.log('MIME type:', mimeType);
       console.log('Folder:', folder || 'root');
 
-      const fullPath = folder ? `${folder}/${fileName}` : fileName;
+      fullPath = folder ? `${folder}/${fileName}` : fileName;
 
       // Ensure fileBuffer is a Buffer
-      const buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
+      buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
       
       const file = await this.storage.createFile(
         this.bucketId,
@@ -60,8 +63,8 @@ class AppwriteStorageService {
         code: error.code,
         type: error.type,
         bucketId: this.bucketId,
-        fileName: fullPath,
-        bufferLength: buffer.length
+        fileName: fullPath || fileName,
+        bufferLength: buffer ? buffer.length : 0
       });
       throw error;
     }

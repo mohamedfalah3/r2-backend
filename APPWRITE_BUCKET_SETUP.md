@@ -166,3 +166,4 @@ If you encounter issues:
 ---
 
 **🎉 Once the bucket is created, your Appwrite Storage integration will be fully functional!**
+

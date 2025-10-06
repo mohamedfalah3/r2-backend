@@ -73,3 +73,6 @@ After creating the bucket, test uploading a file:
 ---
 
 **The bucket "storage" needs to be created in your Appwrite project for the storage to work!** 🪣
+
+
+
