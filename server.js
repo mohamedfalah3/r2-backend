@@ -15,8 +15,38 @@ const PORT = process.env.PORT || 3000;
 // Cache removed - Appwrite Storage handles caching internally
 
 
+// Check required environment variables
+const requiredEnvVars = [
+  'APPWRITE_ENDPOINT',
+  'APPWRITE_PROJECT_ID',
+  'APPWRITE_API_KEY',
+  'APPWRITE_BUCKET_ID'
+];
+
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingVars);
+  console.error('Please set these environment variables in your deployment platform:');
+  missingVars.forEach(varName => {
+    console.error(`  ${varName}=your_value_here`);
+  });
+  console.error('Server cannot start without these variables.');
+  process.exit(1);
+}
+
+console.log('✅ All required environment variables are set');
+
 // Initialize Appwrite Storage service
-const appwriteStorageService = new AppwriteStorageService();
+let appwriteStorageService;
+try {
+  appwriteStorageService = new AppwriteStorageService();
+  console.log('✅ Appwrite Storage service initialized successfully');
+} catch (error) {
+  console.error('❌ Failed to initialize Appwrite Storage service:', error.message);
+  console.error('Please check your Appwrite configuration and API key.');
+  process.exit(1);
+}
 
 // Security middleware
 app.use(helmet());
