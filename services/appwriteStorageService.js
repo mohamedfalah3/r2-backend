@@ -1,4 +1,7 @@
 const { Client, Storage, ID, Permission, Role } = require('appwrite');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 
 class AppwriteStorageService {
   constructor() {
@@ -34,35 +37,48 @@ class AppwriteStorageService {
       // Ensure fileBuffer is a Buffer
       buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
       
-      // Create a Readable stream from the buffer for Node.js compatibility
-      const { Readable } = require('stream');
-      const fileStream = Readable.from(buffer);
+      // Create a temporary file and upload it
+      const tempDir = os.tmpdir();
+      const tempFilePath = path.join(tempDir, `temp_${Date.now()}_${fileName}`);
       
-      // Set the filename and content type for the stream
-      fileStream.name = fileName;
-      fileStream.type = mimeType;
-      
-      const file = await this.storage.createFile(
-        this.bucketId,
-        ID.unique(),
-        fileStream,
-        [
-          Permission.read(Role.any()),
-          Permission.write(Role.any())
-        ]
-      );
+      try {
+        // Write buffer to temporary file
+        fs.writeFileSync(tempFilePath, buffer);
+        
+        // Create a file stream from the temporary file
+        const fileStream = fs.createReadStream(tempFilePath);
+        
+        const file = await this.storage.createFile(
+          this.bucketId,
+          ID.unique(),
+          fileStream,
+          [
+            Permission.read(Role.any()),
+            Permission.write(Role.any())
+          ]
+        );
+        
+        // Clean up temporary file
+        fs.unlinkSync(tempFilePath);
+        
+        console.log('✅ File uploaded successfully to Appwrite Storage');
+        console.log('File ID:', file.$id);
+        console.log('File path:', fullPath);
 
-      console.log('✅ File uploaded successfully to Appwrite Storage');
-      console.log('File ID:', file.$id);
-      console.log('File path:', fullPath);
-
-      return {
-        success: true,
-        fileId: file.$id,
-        fileName: file.name,
-        fileSize: file.sizeOriginal,
-        url: this.getFileUrl(file.$id)
-      };
+        return {
+          success: true,
+          fileId: file.$id,
+          fileName: file.name,
+          fileSize: file.sizeOriginal,
+          url: this.getFileUrl(file.$id)
+        };
+      } catch (error) {
+        // Clean up temporary file on error
+        if (fs.existsSync(tempFilePath)) {
+          fs.unlinkSync(tempFilePath);
+        }
+        throw error;
+      }
 
     } catch (error) {
       console.error('Error uploading file to Appwrite Storage:', error);
