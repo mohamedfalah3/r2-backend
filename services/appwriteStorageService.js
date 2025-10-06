@@ -34,14 +34,18 @@ class AppwriteStorageService {
       // Ensure fileBuffer is a Buffer
       buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
       
-      // Create a proper File object for Appwrite SDK
-      const fileBlob = new Blob([buffer], { type: mimeType });
-      const fileObject = new File([fileBlob], fileName, { type: mimeType });
+      // Create a Readable stream from the buffer for Node.js compatibility
+      const { Readable } = require('stream');
+      const fileStream = Readable.from(buffer);
+      
+      // Set the filename and content type for the stream
+      fileStream.name = fileName;
+      fileStream.type = mimeType;
       
       const file = await this.storage.createFile(
         this.bucketId,
         ID.unique(),
-        fileObject,
+        fileStream,
         [
           Permission.read(Role.any()),
           Permission.write(Role.any())
