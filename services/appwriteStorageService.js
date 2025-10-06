@@ -34,10 +34,13 @@ class AppwriteStorageService {
       // Ensure fileBuffer is a Buffer
       buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
       
+      // Create a File object from the buffer
+      const fileObject = new File([buffer], fileName, { type: mimeType });
+      
       const file = await this.storage.createFile(
         this.bucketId,
         ID.unique(),
-        buffer,
+        fileObject,
         [
           Permission.read(Role.any()),
           Permission.write(Role.any())
