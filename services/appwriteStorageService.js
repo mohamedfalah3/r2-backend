@@ -27,6 +27,7 @@ class AppwriteStorageService {
   async uploadFile(fileBuffer, fileName, mimeType, folder = null) {
     let fullPath;
     let buffer;
+    let tempFilePath;
     
     try {
       console.log('Uploading file to Appwrite Storage...');
@@ -39,18 +40,26 @@ class AppwriteStorageService {
       // Ensure fileBuffer is a Buffer
       buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
 
-      // Create InputFile from buffer
-      const inputFile = sdk.InputFile.fromBuffer(buffer, fullPath);
+      // Write to a temporary file
+      const tempDir = os.tmpdir();
+      tempFilePath = path.join(tempDir, `upload_${Date.now()}_${fileName}`);
+      fs.writeFileSync(tempFilePath, buffer);
+
+      // Create a read stream from the temp file
+      const fileStream = fs.createReadStream(tempFilePath);
 
       const file = await this.storage.createFile(
         this.bucketId,
         ID.unique(),
-        inputFile,
+        fileStream,
         [
           Permission.read(Role.any()),
           Permission.write(Role.any())
         ]
       );
+
+      // Clean up the temp file
+      try { fs.unlinkSync(tempFilePath); } catch (_) {}
 
       console.log('✅ File uploaded successfully to Appwrite Storage');
       console.log('File ID:', file.$id);
@@ -65,6 +74,10 @@ class AppwriteStorageService {
       };
 
     } catch (error) {
+      // Attempt to clean up temp file on error
+      if (tempFilePath) {
+        try { if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath); } catch (_) {}
+      }
       console.error('Error uploading file to Appwrite Storage:', error);
       console.error('Error details:', {
         message: error.message,
