@@ -43,7 +43,8 @@
     "node-cache": "^5.1.2",
     "redis": "^4.6.12",
     "node-appwrite": "^17.2.0",
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "express-rate-limit": "^7.1.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
