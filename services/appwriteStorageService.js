@@ -1,5 +1,6 @@
 // Use server-side SDK in Node
-const { Client, Storage, ID, Permission, Role, InputFile } = require('node-appwrite');
+const { Client, Storage, ID, Permission, Role } = require('node-appwrite');
+const { InputFile } = require('node-appwrite/file');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
