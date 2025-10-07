@@ -56,6 +56,7 @@ class AppwriteStorageService {
       );
 
       console.log('✅ File uploaded successfully to Appwrite Storage');
+      console.log('Full file response:', JSON.stringify(file, null, 2));
       console.log('File ID:', file.$id);
       console.log('File name:', file.name);
 
