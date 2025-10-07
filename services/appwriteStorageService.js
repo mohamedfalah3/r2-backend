@@ -10,7 +10,7 @@ class AppwriteStorageService {
     this.client = new Client();
     this.client.setEndpoint(process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1');
     this.client.setProject(process.env.APPWRITE_PROJECT_ID);
-    this.client.setDevKey(process.env.APPWRITE_API_KEY);
+    this.client.setKey(process.env.APPWRITE_API_KEY);
 
     this.storage = new Storage(this.client);
     this.bucketId = process.env.APPWRITE_BUCKET_ID || '68e12c7d000533b0403d';

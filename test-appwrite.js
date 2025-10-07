@@ -24,7 +24,7 @@ async function testAppwriteStorage() {
     const client = new Client();
     client.setEndpoint(process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1');
     client.setProject(process.env.APPWRITE_PROJECT_ID || 'demo-project');
-    client.setDevKey(process.env.APPWRITE_API_KEY || 'demo-key');
+    client.setKey(process.env.APPWRITE_API_KEY || 'demo-key');
 
     const storage = new Storage(client);
     const bucketId = process.env.APPWRITE_BUCKET_ID || '68e12c7d000533b0403d';
