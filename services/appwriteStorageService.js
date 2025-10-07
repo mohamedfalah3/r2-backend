@@ -14,7 +14,7 @@ class AppwriteStorageService {
     this.client.setKey(process.env.APPWRITE_API_KEY);
 
     this.storage = new Storage(this.client);
-    this.bucketId = process.env.APPWRITE_BUCKET_ID || '68e12c7d000533b0403d';
+    this.bucketId = process.env.APPWRITE_BUCKET_ID || '68e543cb002d88b0ea1c';
   }
 
   /**
@@ -25,7 +25,6 @@ class AppwriteStorageService {
    * @param {string} folder - Optional folder path
    */
   async uploadFile(fileBuffer, fileName, mimeType, folder = null) {
-    let fullPath;
     let buffer;
     let tempFilePath;
     
@@ -35,14 +34,17 @@ class AppwriteStorageService {
       console.log('MIME type:', mimeType);
       console.log('Folder:', folder || 'root');
 
-      fullPath = folder ? `${folder}/${fileName}` : fileName;
+      // If folder is provided and fileName doesn't already include it, prepend it
+      // Otherwise use fileName as is (it may already contain the path)
+      const fullPath = (folder && !fileName.startsWith(folder)) ? `${folder}/${fileName}` : fileName;
 
       // Ensure fileBuffer is a Buffer
       buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
 
-      // Write to a temporary file
+      // Write to a temporary file - use just the filename without path for temp file
       const tempDir = os.tmpdir();
-      tempFilePath = path.join(tempDir, `upload_${Date.now()}_${fileName}`);
+      const baseFileName = path.basename(fileName);
+      tempFilePath = path.join(tempDir, `upload_${Date.now()}_${baseFileName}`);
       fs.writeFileSync(tempFilePath, buffer);
 
       // Create a read stream from the temp file
@@ -84,7 +86,7 @@ class AppwriteStorageService {
         code: error.code,
         type: error.type,
         bucketId: this.bucketId,
-        fileName: fullPath || fileName,
+        fileName: fileName,
         bufferLength: buffer ? buffer.length : 0
       });
       throw error;
