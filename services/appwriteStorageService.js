@@ -1,4 +1,5 @@
-const { Client, Storage, ID, Permission, Role } = require('appwrite');
+// Use server-side SDK InputFile for Node environments
+const { Client, Storage, ID, Permission, Role, InputFile } = require('node-appwrite');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -45,13 +46,13 @@ class AppwriteStorageService {
         // Write buffer to temporary file
         fs.writeFileSync(tempFilePath, buffer);
         
-        // Create a file stream from the temporary file
-        const fileStream = fs.createReadStream(tempFilePath);
+        // Use InputFile.fromPath for Node.js upload
+        const inputFile = InputFile.fromPath(tempFilePath, fullPath);
         
         const file = await this.storage.createFile(
           this.bucketId,
           ID.unique(),
-          fileStream,
+          inputFile,
           [
             Permission.read(Role.any()),
             Permission.write(Role.any())
