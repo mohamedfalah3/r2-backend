@@ -112,7 +112,13 @@ class AppwriteStorageService {
    */
   getFileUrl(fileId) {
     try {
-      return this.storage.getFileView(this.bucketId, fileId);
+      if (!fileId) {
+        throw new Error('File ID is required to generate URL');
+      }
+      
+      const url = this.storage.getFileView(this.bucketId, fileId);
+      // getFileView returns a URL object, convert to string
+      return url.toString();
     } catch (error) {
       console.error('Error generating file URL:', error);
       throw error;
@@ -125,7 +131,13 @@ class AppwriteStorageService {
    */
   getFileDownloadUrl(fileId) {
     try {
-      return this.storage.getFileDownload(this.bucketId, fileId);
+      if (!fileId) {
+        throw new Error('File ID is required to generate download URL');
+      }
+      
+      const url = this.storage.getFileDownload(this.bucketId, fileId);
+      // getFileDownload returns a URL object, convert to string
+      return url.toString();
     } catch (error) {
       console.error('Error generating download URL:', error);
       throw error;
@@ -140,7 +152,13 @@ class AppwriteStorageService {
    */
   getFilePreviewUrl(fileId, width = null, height = null) {
     try {
-      return this.storage.getFilePreview(this.bucketId, fileId, width, height);
+      if (!fileId) {
+        throw new Error('File ID is required to generate preview URL');
+      }
+      
+      const url = this.storage.getFilePreview(this.bucketId, fileId, width, height);
+      // getFilePreview returns a URL object, convert to string
+      return url.toString();
     } catch (error) {
       console.error('Error generating preview URL:', error);
       throw error;
