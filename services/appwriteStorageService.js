@@ -1,4 +1,4 @@
-// Use server-side SDK InputFile for Node environments
+// Use server-side SDK in Node
 const { Client, Storage, ID, Permission, Role, InputFile } = require('node-appwrite');
 const fs = require('fs');
 const path = require('path');
@@ -26,6 +26,7 @@ class AppwriteStorageService {
   async uploadFile(fileBuffer, fileName, mimeType, folder = null) {
     let fullPath;
     let buffer;
+    let tempFilePath;
     
     try {
       console.log('Uploading file to Appwrite Storage...');
@@ -37,51 +38,44 @@ class AppwriteStorageService {
 
       // Ensure fileBuffer is a Buffer
       buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
-      
-      // Create a temporary file and upload it
-      const tempDir = os.tmpdir();
-      const tempFilePath = path.join(tempDir, `temp_${Date.now()}_${fileName}`);
-      
-      try {
-        // Write buffer to temporary file
-        fs.writeFileSync(tempFilePath, buffer);
-        
-        // Use InputFile.fromPath for Node.js upload
-        const inputFile = InputFile.fromPath(tempFilePath, fullPath);
-        
-        const file = await this.storage.createFile(
-          this.bucketId,
-          ID.unique(),
-          inputFile,
-          [
-            Permission.read(Role.any()),
-            Permission.write(Role.any())
-          ]
-        );
-        
-        // Clean up temporary file
-        fs.unlinkSync(tempFilePath);
-        
-        console.log('✅ File uploaded successfully to Appwrite Storage');
-        console.log('File ID:', file.$id);
-        console.log('File path:', fullPath);
 
-        return {
-          success: true,
-          fileId: file.$id,
-          fileName: file.name,
-          fileSize: file.sizeOriginal,
-          url: this.getFileUrl(file.$id)
-        };
-      } catch (error) {
-        // Clean up temporary file on error
-        if (fs.existsSync(tempFilePath)) {
-          fs.unlinkSync(tempFilePath);
-        }
-        throw error;
-      }
+      // Write to a temporary file and upload via InputFile (Node environment)
+      const tempDir = os.tmpdir();
+      tempFilePath = path.join(tempDir, `upload_${Date.now()}_${fileName}`);
+      fs.writeFileSync(tempFilePath, buffer);
+
+      const inputFile = InputFile.fromPath(tempFilePath, fullPath);
+
+      const file = await this.storage.createFile(
+        this.bucketId,
+        ID.unique(),
+        inputFile,
+        [
+          Permission.read(Role.any()),
+          Permission.write(Role.any())
+        ]
+      );
+
+      // Clean up the temp file
+      try { fs.unlinkSync(tempFilePath); } catch (_) {}
+
+      console.log('✅ File uploaded successfully to Appwrite Storage');
+      console.log('File ID:', file.$id);
+      console.log('File path:', fullPath);
+
+      return {
+        success: true,
+        fileId: file.$id,
+        fileName: file.name,
+        fileSize: file.sizeOriginal,
+        url: this.getFileUrl(file.$id)
+      };
 
     } catch (error) {
+      // Attempt to clean up temp file on error
+      if (tempFilePath) {
+        try { if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath); } catch (_) {}
+      }
       console.error('Error uploading file to Appwrite Storage:', error);
       console.error('Error details:', {
         message: error.message,
