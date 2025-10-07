@@ -116,9 +116,13 @@ class AppwriteStorageService {
         throw new Error('File ID is required to generate URL');
       }
       
-      const url = this.storage.getFileView(this.bucketId, fileId);
-      // getFileView returns a URL object, convert to string
-      return url.toString();
+      // getFileView returns a URL object in node-appwrite
+      // We need to get the href property to get the actual URL string
+      const urlObject = this.storage.getFileView(this.bucketId, fileId);
+      const urlString = urlObject.href || urlObject.toString();
+      
+      console.log('Generated file URL:', urlString);
+      return urlString;
     } catch (error) {
       console.error('Error generating file URL:', error);
       throw error;
@@ -135,9 +139,12 @@ class AppwriteStorageService {
         throw new Error('File ID is required to generate download URL');
       }
       
-      const url = this.storage.getFileDownload(this.bucketId, fileId);
-      // getFileDownload returns a URL object, convert to string
-      return url.toString();
+      // getFileDownload returns a URL object in node-appwrite
+      const urlObject = this.storage.getFileDownload(this.bucketId, fileId);
+      const urlString = urlObject.href || urlObject.toString();
+      
+      console.log('Generated download URL:', urlString);
+      return urlString;
     } catch (error) {
       console.error('Error generating download URL:', error);
       throw error;
@@ -156,9 +163,12 @@ class AppwriteStorageService {
         throw new Error('File ID is required to generate preview URL');
       }
       
-      const url = this.storage.getFilePreview(this.bucketId, fileId, width, height);
-      // getFilePreview returns a URL object, convert to string
-      return url.toString();
+      // getFilePreview returns a URL object in node-appwrite
+      const urlObject = this.storage.getFilePreview(this.bucketId, fileId, width, height);
+      const urlString = urlObject.href || urlObject.toString();
+      
+      console.log('Generated preview URL:', urlString);
+      return urlString;
     } catch (error) {
       console.error('Error generating preview URL:', error);
       throw error;
