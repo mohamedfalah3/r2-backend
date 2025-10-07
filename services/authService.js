@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { Client, Account, Databases, ID } = require('appwrite');
+const { Client, Account, Databases, ID } = require('node-appwrite');
 
 // Initialize Appwrite client with fallback values
 const appwriteClient = new Client()
