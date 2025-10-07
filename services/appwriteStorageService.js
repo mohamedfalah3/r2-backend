@@ -47,13 +47,15 @@ class AppwriteStorageService {
       tempFilePath = path.join(tempDir, `upload_${Date.now()}_${baseFileName}`);
       fs.writeFileSync(tempFilePath, buffer);
 
-      // Create a read stream from the temp file
-      const fileStream = fs.createReadStream(tempFilePath);
+      console.log('Temp file created:', tempFilePath);
+      console.log('File size:', buffer.length, 'bytes');
 
+      // Use fs.createReadStream with node-appwrite
+      // The SDK expects a readable stream or file path
       const file = await this.storage.createFile(
         this.bucketId,
         ID.unique(),
-        fileStream,
+        tempFilePath,  // Pass the file path directly
         [
           Permission.read(Role.any()),
           Permission.write(Role.any())
