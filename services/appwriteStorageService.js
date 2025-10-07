@@ -1,6 +1,5 @@
 // Use server-side SDK in Node
-const sdk = require('node-appwrite');
-const { Client, Storage, ID, Permission, Role, InputFile } = sdk;
+const { Client, Storage, ID, Permission, Role, InputFile } = require('node-appwrite');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -26,7 +25,6 @@ class AppwriteStorageService {
    */
   async uploadFile(fileBuffer, fileName, mimeType, folder = null) {
     let buffer;
-    let tempFilePath;
     
     try {
       console.log('Uploading file to Appwrite Storage...');
@@ -41,33 +39,24 @@ class AppwriteStorageService {
       // Ensure fileBuffer is a Buffer
       buffer = Buffer.isBuffer(fileBuffer) ? fileBuffer : Buffer.from(fileBuffer);
 
-      // Write to a temporary file - use just the filename without path for temp file
-      const tempDir = os.tmpdir();
-      const baseFileName = path.basename(fileName);
-      tempFilePath = path.join(tempDir, `upload_${Date.now()}_${baseFileName}`);
-      fs.writeFileSync(tempFilePath, buffer);
-
-      console.log('Temp file created:', tempFilePath);
       console.log('File size:', buffer.length, 'bytes');
 
-      // Use fs.createReadStream with node-appwrite
-      // The SDK expects a readable stream or file path
+      // Use InputFile.fromBuffer as per node-appwrite documentation
+      const inputFile = InputFile.fromBuffer(buffer, path.basename(fileName));
+
       const file = await this.storage.createFile(
         this.bucketId,
         ID.unique(),
-        tempFilePath,  // Pass the file path directly
+        inputFile,
         [
           Permission.read(Role.any()),
           Permission.write(Role.any())
         ]
       );
 
-      // Clean up the temp file
-      try { fs.unlinkSync(tempFilePath); } catch (_) {}
-
       console.log('✅ File uploaded successfully to Appwrite Storage');
       console.log('File ID:', file.$id);
-      console.log('File path:', fullPath);
+      console.log('File name:', file.name);
 
       return {
         success: true,
@@ -78,10 +67,6 @@ class AppwriteStorageService {
       };
 
     } catch (error) {
-      // Attempt to clean up temp file on error
-      if (tempFilePath) {
-        try { if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath); } catch (_) {}
-      }
       console.error('Error uploading file to Appwrite Storage:', error);
       console.error('Error details:', {
         message: error.message,
